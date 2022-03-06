@@ -7,6 +7,9 @@ class Perceptron:
         self.threshold = threshold
         self.activation_function = activation_function
         self.weights = weights
+        self.error_total = 0
+        self.updatecount = 0
+        self.MSE = None
 
     def __str__(self):
         return f'bias: {self.bias} - threshold: {self.threshold} - activation_function: {self.activation_function.__name__}\n' \
@@ -22,22 +25,27 @@ class Perceptron:
         return self.activation_function(self.bias + self.dot(self.weights, inputs))
 
     def update(self, inputs, target, learning_rate=0.1):
-        """this is pretty much placeholder, haven't got time to make the assignment but want to turn it in anyway
-            so I have the right to do the re-do."""
+        """This function allows os to train/fit our perceptron by following the perceptron learning rule."""
+
         y = self.determine_output(inputs)
         error = target - y
-
-        if error > 0:
-            delta_weights = self.dot([learning_rate * error], self.weights)
+        if error != 0:
+            delta_weights = []
+            for w,i in zip(self.weights, inputs):
+                delta_weights.append(w + (learning_rate * error * i))
             delta_bias = learning_rate * error
-            self.weights = [x+y for x,y in zip(self.weights, delta_weights)]
+            self.weights = delta_weights
             self.bias += delta_bias
-
-
+            self.threshold = -self.bias
+        #here we keep track of the updates we've done and the squared error, so we can easily determine the loss later
+        self.updatecount += 1
+        self.error_total += error**2
 
     def loss(self):
-        """See update"""
-        pass
+        """This function keeps track of the MSE by simply dividing the sum of squared errors,
+        divided by the number of updates already done."""
+        self.MSE = self.error_total/self.updatecount
+        return self.MSE
 
 class PerceptronLayer:
 
